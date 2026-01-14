@@ -27,15 +27,20 @@ class BluetoothController:
         self.connected = False
         self.initial_encoder_value: Optional[int] = None
         self.current_encoder_value: int = 0
-        self.user_amplitude: float = 1.0
+        self.user_amplitude: float = 0.5
 
         # Configuration
-        self.encoder_step_size: float = 0.01  # Amplitude change per encoder click
+        self.encoder_step_size: float = 0.005  # Amplitude change per encoder click
         self.encoder_direction_reversed: bool = False  # Direction toggle
         self.max_amplitude: float = 2.0  # Maximum user amplitude limit
 
         # Button toggle state
         self.amplitude_before_stop: Optional[float] = None  # Store amplitude before button press
+
+        # Battery monitoring
+        self.battery_voltage: float = 0.0  # Current battery voltage
+        self.low_battery_warning: bool = False  # Low battery flag
+        self.last_battery_update: float = 0.0  # Timestamp of last battery update
 
         # Auto-reconnect
         self.auto_reconnect_enabled: bool = False  # Enable automatic reconnection
@@ -45,6 +50,7 @@ class BluetoothController:
         self.on_amplitude_change: Optional[Callable[[float], None]] = None
         self.on_switch_press: Optional[Callable[[], None]] = None
         self.on_connection_change: Optional[Callable[[bool], None]] = None
+        self.on_battery_update: Optional[Callable[[float, bool], None]] = None
 
         # Threading
         self.loop: Optional[asyncio.AbstractEventLoop] = None
@@ -78,6 +84,15 @@ class BluetoothController:
         """
         self.on_connection_change = callback
 
+    def set_battery_callback(self, callback: Callable[[float, bool], None]):
+        """
+        Set callback for battery voltage updates.
+
+        Args:
+            callback: Function to call with (voltage, low_battery_warning)
+        """
+        self.on_battery_update = callback
+
     def _notification_handler(self, sender, data: bytearray):
         """
         Handle notifications from Arduino.
@@ -102,9 +117,9 @@ class BluetoothController:
                         self.user_amplitude = self.amplitude_before_stop
                         print(f"[BLE] Switch pressed - resuming (amplitude: {self.user_amplitude:.2f})")
                     else:
-                        # No previous value, restore to 1.0
-                        self.user_amplitude = 1.0
-                        print("[BLE] Switch pressed - resuming (amplitude: 1.0)")
+                        # No previous value, restore to 0.5
+                        self.user_amplitude = 0.5
+                        print("[BLE] Switch pressed - resuming (amplitude: 0.5)")
 
                 if self.on_switch_press:
                     self.on_switch_press()
@@ -121,7 +136,7 @@ class BluetoothController:
                     # Set initial value on first reading
                     if self.initial_encoder_value is None:
                         self.initial_encoder_value = encoder_value
-                        print(f"[BLE] Initial encoder position: {encoder_value} (amplitude = 1.0)")
+                        print(f"[BLE] Initial encoder position: {encoder_value} (amplitude = 0.5)")
 
                     # Calculate amplitude based on change from initial position
                     # Apply direction reversal if enabled
@@ -129,7 +144,7 @@ class BluetoothController:
                     if self.encoder_direction_reversed:
                         delta = -delta
                     # Clamp between 0.0 and max_amplitude
-                    self.user_amplitude = max(0.0, min(self.max_amplitude, 1.0 + (delta * self.encoder_step_size)))
+                    self.user_amplitude = max(0.0, min(self.max_amplitude, 0.5 + (delta * self.encoder_step_size)))
 
                     # Notify callback
                     if self.on_amplitude_change:
@@ -137,6 +152,53 @@ class BluetoothController:
 
                 except (ValueError, IndexError) as e:
                     print(f"[BLE] Error parsing encoder value: {e}")
+                return
+
+            # Parse battery voltage updates
+            if message.startswith("Battery: "):
+                try:
+                    voltage_str = message.split(": ")[1].replace("V", "")
+                    voltage = float(voltage_str)
+                    self.battery_voltage = voltage
+                    import time
+                    self.last_battery_update = time.time()
+
+                    # Check for low battery (< 7V)
+                    is_low = voltage < 7.0
+                    if is_low != self.low_battery_warning:
+                        self.low_battery_warning = is_low
+                        if is_low:
+                            print(f"[BLE] WARNING: Low battery detected! {voltage:.2f}V")
+                        else:
+                            print(f"[BLE] Battery level restored: {voltage:.2f}V")
+
+                    # Notify callback
+                    if self.on_battery_update:
+                        self.on_battery_update(voltage, is_low)
+
+                except (ValueError, IndexError) as e:
+                    print(f"[BLE] Error parsing battery voltage: {e}")
+                return
+
+            # Parse low battery warnings
+            if message.startswith("BATTERY LOW: "):
+                try:
+                    voltage_str = message.split(": ")[1].replace("V", "")
+                    voltage = float(voltage_str)
+                    self.battery_voltage = voltage
+                    self.low_battery_warning = True
+                    import time
+                    self.last_battery_update = time.time()
+
+                    print(f"[BLE] LOW BATTERY WARNING! {voltage:.2f}V")
+
+                    # Notify callback
+                    if self.on_battery_update:
+                        self.on_battery_update(voltage, True)
+
+                except (ValueError, IndexError) as e:
+                    print(f"[BLE] Error parsing low battery warning: {e}")
+                return
 
         except UnicodeDecodeError as e:
             print(f"[BLE] Error decoding message: {e}")
@@ -314,11 +376,11 @@ class BluetoothController:
         return self.connected
 
     def reset_baseline(self):
-        """Reset the encoder baseline to current position (sets amplitude to 1.0)."""
+        """Reset the encoder baseline to current position (sets amplitude to 0.5)."""
         if self.connected:
             self.initial_encoder_value = self.current_encoder_value
-            self.user_amplitude = 1.0
-            print(f"[BLE] Baseline reset to {self.current_encoder_value} (amplitude = 1.0)")
+            self.user_amplitude = 0.5
+            print(f"[BLE] Baseline reset to {self.current_encoder_value} (amplitude = 0.5)")
             if self.on_amplitude_change:
                 self.on_amplitude_change(self.user_amplitude)
 
@@ -333,7 +395,7 @@ class BluetoothController:
             delta = self.current_encoder_value - self.initial_encoder_value
             if self.encoder_direction_reversed:
                 delta = -delta
-            self.user_amplitude = max(0.0, min(self.max_amplitude, 1.0 + (delta * self.encoder_step_size)))
+            self.user_amplitude = max(0.0, min(self.max_amplitude, 0.5 + (delta * self.encoder_step_size)))
             if self.on_amplitude_change:
                 self.on_amplitude_change(self.user_amplitude)
 
@@ -363,6 +425,24 @@ class BluetoothController:
             if self.on_amplitude_change:
                 self.on_amplitude_change(self.user_amplitude)
 
+    def get_battery_voltage(self) -> float:
+        """
+        Get current battery voltage.
+
+        Returns:
+            float: Battery voltage in volts
+        """
+        return self.battery_voltage
+
+    def is_low_battery(self) -> bool:
+        """
+        Check if battery is low (< 7V).
+
+        Returns:
+            bool: True if battery is low
+        """
+        return self.low_battery_warning
+
     def get_status(self) -> dict:
         """
         Get current status information.
@@ -378,5 +458,8 @@ class BluetoothController:
             'step_size': self.encoder_step_size,
             'direction_reversed': self.encoder_direction_reversed,
             'max_amplitude': self.max_amplitude,
-            'auto_reconnect_enabled': self.auto_reconnect_enabled
+            'auto_reconnect_enabled': self.auto_reconnect_enabled,
+            'battery_voltage': self.battery_voltage,
+            'low_battery_warning': self.low_battery_warning,
+            'last_battery_update': self.last_battery_update
         }

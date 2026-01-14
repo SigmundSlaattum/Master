@@ -342,7 +342,7 @@
                     </div>
                     <div class="stat-box">
                         <div class="stat-label">User Amplitude</div>
-                        <div class="stat-value" id="userAmplitude">1.00×</div>
+                        <div class="stat-value" id="userAmplitude">0.50×</div>
                     </div>
                 </div>
                 <div class="stat-box" style="margin-bottom: 15px;">
@@ -355,6 +355,57 @@
                     <button class="btn-info" onclick="resetBluetoothBaseline()">Reset Baseline</button>
                     <button class="btn-warning" onclick="toggleEncoderDirection()">↻ Swap Direction</button>
                 </div>
+            </div>
+
+            <!-- PID Tuning Panel -->
+            <div class="panel">
+                <h2>⚙️ PID Tuning</h2>
+                <p style="color: #cbd5e0; margin-bottom: 15px; font-size: 14px;">
+                    Tune motor control PID parameters. Changes applied immediately.
+                </p>
+                <div class="control-group">
+                    <label for="posGain">Position Gain (P): <span id="posGainValue">--</span></label>
+                    <input type="number" id="posGain" step="1" min="0" max="200" placeholder="Current: --">
+                </div>
+                <div class="control-group">
+                    <label for="velGain">Velocity Gain (D): <span id="velGainValue">--</span></label>
+                    <input type="number" id="velGain" step="0.01" min="0" max="2" placeholder="Current: --">
+                </div>
+                <div class="control-group">
+                    <label for="velIntGain">Velocity Integrator (I): <span id="velIntGainValue">--</span></label>
+                    <input type="number" id="velIntGain" step="0.01" min="0" max="1" placeholder="Current: --">
+                </div>
+                <div class="button-grid">
+                    <button class="btn-success" onclick="updatePID()">✓ Apply PID</button>
+                    <button class="btn-info" onclick="refreshPID()">🔄 Refresh</button>
+                </div>
+            </div>
+
+            <!-- Phase Nudging Panel -->
+            <div class="panel">
+                <h2>🎯 Phase Nudging</h2>
+                <p style="color: #cbd5e0; margin-bottom: 15px; font-size: 14px;">
+                    Fine-tune motion phase. ← lag behind, → lead ahead of music.
+                </p>
+                <div class="stat-box" style="margin-bottom: 15px;">
+                    <div class="stat-label">Current Phase Offset</div>
+                    <div class="stat-value" id="currentPhase">0.000</div>
+                </div>
+                <div class="control-group">
+                    <label for="phaseNudgeAmount">Nudge Amount:</label>
+                    <select id="phaseNudgeAmount">
+                        <option value="0.001">1.0 ms</option>
+                        <option value="0.0005" selected>0.5 ms</option>
+                        <option value="0.0001">0.1 ms</option>
+                    </select>
+                </div>
+                <div class="button-grid">
+                    <button class="btn-warning" onclick="nudgePhase(-1)">← Lag Behind</button>
+                    <button class="btn-success" onclick="nudgePhase(1)">Lead Ahead →</button>
+                </div>
+                <button class="btn-secondary" onclick="resetPhase()" style="width: 100%; margin-top: 10px;">
+                    ↺ Reset Phase
+                </button>
             </div>
 
             <!-- Data Recording Panel -->
@@ -427,6 +478,8 @@
             document.getElementById('statMaxError').textContent = stats.max_position_error.toFixed(3);
             document.getElementById('statPhase').textContent = stats.phase_offset.toFixed(2);
             document.getElementById('statBeatLock').textContent = stats.beat_locked ? '✅' : '❌';
+            // Update phase nudging display
+            document.getElementById('currentPhase').textContent = stats.phase_offset.toFixed(4);
         });
 
         socket.on('tap_registered', (data) => {
@@ -461,7 +514,10 @@
 
         socket.on('bluetooth_status', (data) => {
             const statusElement = document.getElementById('bleStatus');
-            if (data.connected) {
+            if (data.scanning) {
+                statusElement.textContent = 'Scanning...';
+                statusElement.style.color = '#f59e0b';  // Orange for scanning
+            } else if (data.connected) {
                 statusElement.textContent = 'Connected ✅';
                 statusElement.style.color = '#10b981';
             } else {
@@ -485,6 +541,7 @@
                 ampElement.style.color = '#ffffff';  // White for normal
             }
         });
+
 
         // Load song library
         async function loadSongLibrary() {
@@ -709,6 +766,79 @@
             }
         }
 
+        // PID Tuning functions
+        async function refreshPID() {
+            const result = await apiCall('/api/pid/get', 'GET');
+            if (result.success) {
+                const pid = result.pid;
+                document.getElementById('posGainValue').textContent = pid.pos_gain.toFixed(1);
+                document.getElementById('velGainValue').textContent = pid.vel_gain.toFixed(3);
+                document.getElementById('velIntGainValue').textContent = pid.vel_integrator_gain.toFixed(3);
+
+                document.getElementById('posGain').value = pid.pos_gain;
+                document.getElementById('velGain').value = pid.vel_gain;
+                document.getElementById('velIntGain').value = pid.vel_integrator_gain;
+
+                addLog('PID values refreshed', 'success');
+            }
+        }
+
+        async function updatePID() {
+            const posGain = parseFloat(document.getElementById('posGain').value);
+            const velGain = parseFloat(document.getElementById('velGain').value);
+            const velIntGain = parseFloat(document.getElementById('velIntGain').value);
+
+            if (isNaN(posGain) || isNaN(velGain) || isNaN(velIntGain)) {
+                addLog('Please enter valid PID values', 'warning');
+                return;
+            }
+
+            const result = await apiCall('/api/pid/set', 'POST', {
+                pos_gain: posGain,
+                vel_gain: velGain,
+                vel_integrator_gain: velIntGain
+            });
+
+            if (result.success) {
+                document.getElementById('posGainValue').textContent = posGain.toFixed(1);
+                document.getElementById('velGainValue').textContent = velGain.toFixed(3);
+                document.getElementById('velIntGainValue').textContent = velIntGain.toFixed(3);
+                addLog(`PID updated: P=${posGain}, D=${velGain}, I=${velIntGain}`, 'success');
+            }
+        }
+
+        // Phase Nudging functions
+        async function nudgePhase(direction) {
+            const nudgeAmountSeconds = parseFloat(document.getElementById('phaseNudgeAmount').value);
+
+            const result = await apiCall('/api/phase/nudge', 'POST', {
+                direction: direction,
+                amount_seconds: nudgeAmountSeconds
+            });
+
+            if (result.success) {
+                document.getElementById('currentPhase').textContent = result.phase_offset.toFixed(4);
+                const directionText = direction > 0 ? 'lead ahead' : 'lag behind';
+                const amountMs = (nudgeAmountSeconds * 1000).toFixed(1);
+                addLog(`Phase nudged ${amountMs}ms to ${directionText} (total: ${result.phase_offset.toFixed(4)} rad)`, 'info');
+            }
+        }
+
+        async function resetPhase() {
+            const result = await apiCall('/api/phase/reset', 'POST');
+            if (result.success) {
+                document.getElementById('currentPhase').textContent = '0.000';
+                addLog('Phase offset reset to 0', 'success');
+            }
+        }
+
+        async function refreshPhase() {
+            const result = await apiCall('/api/phase/get', 'GET');
+            if (result.success) {
+                document.getElementById('currentPhase').textContent = result.phase_offset.toFixed(4);
+            }
+        }
+
         // Data recording functions
         async function plotData(plotType) {
             addLog(`Generating ${plotType} plot...`, 'info');
@@ -795,6 +925,7 @@
         // Initial load
         loadSongLibrary();
         updateStatus();
+        refreshPID();
     </script>
 </body>
 </html>

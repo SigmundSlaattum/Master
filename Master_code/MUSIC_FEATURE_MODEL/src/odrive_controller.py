@@ -226,7 +226,7 @@ def configure_odrive(odrv0):
     odrv0.axis0.controller.config.vel_limit_tolerance = 1.5
     odrv0.axis0.trap_traj.config.accel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
     odrv0.axis0.trap_traj.config.decel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
-    odrv0.axis0.controller.config.pos_gain = 30
+    odrv0.axis0.controller.config.pos_gain = 50
 
 
     # ---- breake resistance and related parameters ----

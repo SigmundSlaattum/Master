@@ -108,7 +108,7 @@ class SystemState:
                 })
 
         def on_connection_change(connected: bool):
-            socketio.emit('bluetooth_status', {'connected': connected})
+            socketio.emit('bluetooth_status', {'connected': connected, 'scanning': False})
             if connected:
                 socketio.emit('status', {
                     'message': '✅ Remote control connected',
@@ -120,9 +120,23 @@ class SystemState:
                     'type': 'warning'
                 })
 
+        def on_battery_update(voltage: float, low_battery: bool):
+            # Emit battery update to web interface
+            socketio.emit('battery_update', {
+                'voltage': voltage,
+                'low_battery': low_battery
+            })
+            # Only show low battery as status message (normal updates are silent)
+            if low_battery:
+                socketio.emit('status', {
+                    'message': f'⚠️ LOW BATTERY WARNING: {voltage:.2f}V - Please recharge soon!',
+                    'type': 'error'
+                })
+
         self.bluetooth_controller.set_amplitude_callback(on_amplitude_change)
         self.bluetooth_controller.set_switch_callback(on_switch_press)
         self.bluetooth_controller.set_connection_callback(on_connection_change)
+        self.bluetooth_controller.set_battery_callback(on_battery_update)
 
 state = SystemState()
 
@@ -517,6 +531,7 @@ def bluetooth_connect():
 
         # Connect in background (non-blocking)
         socketio.emit('status', {'message': 'Scanning for remote control...', 'type': 'info'})
+        socketio.emit('bluetooth_status', {'connected': False, 'scanning': True})
         success = state.bluetooth_controller.connect()
 
         if success:
@@ -665,6 +680,137 @@ def data_statistics():
 
         return jsonify({'success': True, 'statistics': stats})
     except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/pid/get', methods=['GET'])
+def get_pid():
+    """Get current PID values from ODrive."""
+    if state.odrv0 is None and not state.simulation_mode:
+        return jsonify({'success': False, 'error': 'Not connected to ODrive'})
+
+    if state.simulation_mode:
+        return jsonify({'success': False, 'error': 'PID tuning not available in simulation mode'})
+
+    try:
+        pid_values = {
+            'pos_gain': state.odrv0.axis0.controller.config.pos_gain,
+            'vel_gain': state.odrv0.axis0.controller.config.vel_gain,
+            'vel_integrator_gain': state.odrv0.axis0.controller.config.vel_integrator_gain
+        }
+        return jsonify({'success': True, 'pid': pid_values})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/pid/set', methods=['POST'])
+def set_pid():
+    """Set PID values on ODrive (without calling full configuration)."""
+    if state.odrv0 is None and not state.simulation_mode:
+        return jsonify({'success': False, 'error': 'Not connected to ODrive'})
+
+    if state.simulation_mode:
+        return jsonify({'success': False, 'error': 'PID tuning not available in simulation mode'})
+
+    try:
+        data = request.json
+        pos_gain = data.get('pos_gain')
+        vel_gain = data.get('vel_gain')
+        vel_integrator_gain = data.get('vel_integrator_gain')
+
+        if pos_gain is None or vel_gain is None or vel_integrator_gain is None:
+            return jsonify({'success': False, 'error': 'Missing PID parameters'})
+
+        # Validate ranges
+        if not (0 <= pos_gain <= 200):
+            return jsonify({'success': False, 'error': 'pos_gain must be between 0 and 200'})
+        if not (0 <= vel_gain <= 2):
+            return jsonify({'success': False, 'error': 'vel_gain must be between 0 and 2'})
+        if not (0 <= vel_integrator_gain <= 1):
+            return jsonify({'success': False, 'error': 'vel_integrator_gain must be between 0 and 1'})
+
+        # Update PID values directly (no configuration save/reboot)
+        state.odrv0.axis0.controller.config.pos_gain = float(pos_gain)
+        state.odrv0.axis0.controller.config.vel_gain = float(vel_gain)
+        state.odrv0.axis0.controller.config.vel_integrator_gain = float(vel_integrator_gain)
+
+        socketio.emit('status', {
+            'message': f'PID updated: P={pos_gain}, D={vel_gain:.3f}, I={vel_integrator_gain:.3f}',
+            'type': 'success'
+        })
+
+        return jsonify({'success': True})
+    except Exception as e:
+        socketio.emit('status', {'message': f'PID update error: {str(e)}', 'type': 'error'})
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/phase/get', methods=['GET'])
+def get_phase():
+    """Get current phase offset from motor controller."""
+    if not state.running or state.motor_controller is None:
+        return jsonify({'success': False, 'error': 'Motor not running'})
+
+    try:
+        phase_offset = state.motor_controller.phase_offset
+        return jsonify({'success': True, 'phase_offset': phase_offset})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/phase/nudge', methods=['POST'])
+def nudge_phase():
+    """Nudge phase offset by specified amount and direction."""
+    if not state.running or state.motor_controller is None:
+        return jsonify({'success': False, 'error': 'Motor not running'})
+
+    try:
+        data = request.json
+        direction = data.get('direction')  # 1 for lead ahead, -1 for lag behind
+        amount_seconds = data.get('amount_seconds')  # Time in seconds
+
+        if direction is None or amount_seconds is None:
+            return jsonify({'success': False, 'error': 'Missing direction or amount'})
+
+        # Convert time nudge to phase nudge
+        # Phase (radians) = 2π × frequency × time
+        # Leading ahead (positive direction) means adding positive phase
+        # Lagging behind (negative direction) means subtracting phase
+        frequency = state.motor_controller.frequency  # Hz
+        phase_change = 2 * 3.14159265359 * frequency * float(amount_seconds) * int(direction)
+
+        # Apply phase change
+        state.motor_controller.phase_offset += phase_change
+
+        socketio.emit('status', {
+            'message': f'Phase nudged {abs(amount_seconds)*1000:.1f}ms {"ahead" if direction > 0 else "behind"}',
+            'type': 'info'
+        })
+
+        return jsonify({
+            'success': True,
+            'phase_offset': state.motor_controller.phase_offset
+        })
+    except Exception as e:
+        socketio.emit('status', {'message': f'Phase nudge error: {str(e)}', 'type': 'error'})
+        return jsonify({'success': False, 'error': str(e)})
+
+
+@app.route('/api/phase/reset', methods=['POST'])
+def reset_phase():
+    """Reset phase offset to zero."""
+    if not state.running or state.motor_controller is None:
+        return jsonify({'success': False, 'error': 'Motor not running'})
+
+    try:
+        state.motor_controller.phase_offset = 0.0
+        socketio.emit('status', {
+            'message': 'Phase offset reset to 0',
+            'type': 'success'
+        })
+        return jsonify({'success': True})
+    except Exception as e:
+        socketio.emit('status', {'message': f'Phase reset error: {str(e)}', 'type': 'error'})
         return jsonify({'success': False, 'error': str(e)})
 
 

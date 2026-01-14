@@ -132,9 +132,13 @@ def calculate_amplitude_ratio(complexity):
     Returns:
         tuple: (amplitude1, amplitude2)
     """
-    base_amplitude = 10.0
-    gear_ratio = 2.0
-    motor_amplitude = base_amplitude * gear_ratio
+    # Gear ratio: 15:1 (motor turns 15 times for 1 output revolution)
+    # Maximum output swing: ±0.5 revolutions (total 1 revolution)
+    # Maximum motor swing: ±7.5 revolutions (0.5 * 15)
+    gear_ratio = 15.0
+    max_output_amplitude = 0.5  # revolutions (±0.5 = 1 total revolution)
+    motor_amplitude = max_output_amplitude * gear_ratio  # 7.5 revolutions at motor
+
     amplitude1 = motor_amplitude * (1.0 - complexity * 0.5)
     amplitude2 = motor_amplitude * complexity
     return amplitude1, amplitude2
@@ -226,6 +230,89 @@ def cleanup_session(play_music: bool, viz_manager: VisualizationManager,
         audio_synth.stop()
 
 
+def _visualization_update_thread(motor_controller: MotorController, viz_manager: VisualizationManager,
+                                music_analyzer: MusicAnalyzer, play_music: bool):
+    """
+    Background thread for visualization updates (non-critical for motor control).
+    Runs at lower frequency to reduce overhead.
+    """
+    global program_running
+
+    while program_running and motor_controller.running:
+        try:
+            if viz_manager:
+                # Get current positions
+                expected_pos = motor_controller.calculate_expected_position(
+                    get_real_audio_time() if play_music else (time.time() - motor_controller.running)
+                )
+                feedback_pos = motor_controller.get_current_encoder_position()
+
+                # Update visualization
+                viz_manager.update_position(expected_pos, feedback_pos)
+
+                # Update beat/rms data
+                if play_music and music_analyzer is not None:
+                    beat_phase = music_analyzer.current_beat_phase
+                    viz_manager.update_beat_rms(beat_phase, motor_controller.bpm)
+
+            time.sleep(0.033)  # ~30 Hz update rate (plenty for visualization)
+        except Exception as e:
+            print(f"\nVisualization thread error: {e}")
+            break
+
+
+def _data_recording_thread(motor_controller: MotorController, data_recorder, play_music: bool, start_time: float):
+    """
+    Background thread for data recording (non-critical for motor control).
+    Records at moderate frequency.
+    """
+    global program_running
+
+    while program_running and motor_controller.running:
+        try:
+            if data_recorder and data_recorder.is_recording():
+                current_time = get_real_audio_time() if play_music else (time.time() - start_time)
+
+                # Calculate positions
+                expected_pos = motor_controller.calculate_expected_position(current_time)
+                original_pos = motor_controller.calculate_original_position(current_time)
+                user_amp = motor_controller.get_user_amplitude()
+
+                # Record sample
+                data_recorder.record_sample(user_amp, original_pos, expected_pos)
+
+            time.sleep(0.01)  # 100 Hz recording rate (sufficient for analysis)
+        except Exception as e:
+            print(f"\nData recording thread error: {e}")
+            break
+
+
+def _status_display_thread(motor_controller: MotorController, music_analyzer: MusicAnalyzer,
+                          play_music: bool, start_time: float):
+    """
+    Background thread for console status updates (non-critical).
+    Updates at human-readable frequency.
+    """
+    global program_running
+
+    while program_running and motor_controller.running:
+        try:
+            current_time = get_real_audio_time() if play_music else (time.time() - start_time)
+
+            # Calculate current error for display
+            current_encoder_pos = motor_controller.get_current_encoder_position()
+            expected_pos = motor_controller.calculate_expected_position(current_time)
+            position_error = expected_pos - current_encoder_pos
+
+            complexity = music_analyzer.current_complexity if music_analyzer else 0.0
+            motor_controller.print_status(current_time, position_error, complexity)
+
+            time.sleep(0.25)  # 4 Hz update rate (readable for humans)
+        except Exception as e:
+            print(f"\nStatus display thread error: {e}")
+            break
+
+
 def run_control_loop(motor_controller: MotorController,
                     viz_manager: VisualizationManager,
                     audio_file: str,
@@ -234,7 +321,19 @@ def run_control_loop(motor_controller: MotorController,
                     audio_synth: AudioSynthesizer = None,
                     data_recorder = None):
     """
-    Main motor control loop with music synchronization.
+    Optimized main motor control loop with music synchronization.
+
+    Non-essential operations moved to background threads:
+    - Visualization updates
+    - Data recording
+    - Status display
+
+    Core loop only handles:
+    - Reading encoder position
+    - Calculating expected position
+    - Phase correction (if enabled)
+    - Sending motor commands
+    - Timing control
 
     Args:
         motor_controller: MotorController instance
@@ -271,87 +370,133 @@ def run_control_loop(motor_controller: MotorController,
     # Reset statistics
     motor_controller.reset_statistics()
 
-    print("\n=== Synchronization Active ===")
+    print("\n=== Synchronization Active (Optimized Control Loop) ===")
     print(f"Mode: {'SIMULATION' if motor_controller.is_simulation_mode() else 'HARDWARE'}")
     print(f"Delay Compensation: {'ENABLED' if motor_controller.phase_correction_enabled else 'DISABLED'}")
     print(f"Audio Synthesis: {'ENABLED' if (audio_synth and audio_synth.is_running()) else 'DISABLED'}")
-    print(f"Visualization: {'ENABLED' if viz_manager else 'DISABLED'}")
-    print("==============================\n")
+    print(f"Visualization: {'ENABLED (background thread)' if viz_manager else 'DISABLED'}")
+    print(f"Data Recording: {'ENABLED (background thread)' if data_recorder else 'DISABLED'}")
+    print("======================================================\n")
+
+    # Mark motor controller as running (for background threads)
+    motor_controller.running = True
+
+    # Start background threads for non-critical operations
+    background_threads = []
+
+    if viz_manager:
+        viz_thread = threading.Thread(
+            target=_visualization_update_thread,
+            args=(motor_controller, viz_manager, music_analyzer, play_music),
+            daemon=True,
+            name="VisualizationThread"
+        )
+        viz_thread.start()
+        background_threads.append(viz_thread)
+
+    if data_recorder:
+        data_thread = threading.Thread(
+            target=_data_recording_thread,
+            args=(motor_controller, data_recorder, play_music, start_time),
+            daemon=True,
+            name="DataRecordingThread"
+        )
+        data_thread.start()
+        background_threads.append(data_thread)
+
+    # Status display thread
+    status_thread = threading.Thread(
+        target=_status_display_thread,
+        args=(motor_controller, music_analyzer, play_music, start_time),
+        daemon=True,
+        name="StatusDisplayThread"
+    )
+    status_thread.start()
+    background_threads.append(status_thread)
+
+    # ============================================================================
+    # OPTIMIZED CRITICAL CONTROL LOOP - Keep this as lean as possible!
+    # ============================================================================
+
+    # Pre-calculate combined conditional flags (Optimization 2)
+    phase_correction_active = (motor_controller.phase_correction_enabled and
+                               play_music and music_analyzer is not None)
+
+    # Pre-compute time getter function to avoid conditional in hot loop
+    if play_music:
+        get_current_time = get_real_audio_time
+    else:
+        def get_current_time():
+            return time.time() - start_time
 
     iteration = 0
+    last_error_check_time = start_time
+    error_check_interval = 5.0  # Check for hardware errors every 5 seconds
+    stats_update_interval = 10  # Update statistics every 10 iterations (~6 Hz) (Optimization 3)
+
     while program_running:
-        # Check for hardware errors
-        if motor_controller.check_hardware_errors():
-            break
+        # 1. Check for hardware errors (every 5 seconds, not critical for tight loop)
+        current_wall_time = time.time()
+        if current_wall_time - last_error_check_time >= error_check_interval:
+            if motor_controller.check_hardware_errors():
+                break
+            last_error_check_time = current_wall_time
 
-        # Get current time
-        current_time = get_real_audio_time() if play_music else (time.time() - start_time)
-
+        # 2. Get current time (critical) - using pre-computed function
+        current_time = get_current_time()
         if current_time >= duration:
             break
 
-        # Get current encoder position
+        # 3. Read encoder position (critical)
         current_encoder_pos = motor_controller.get_current_encoder_position()
         current_motor_position = current_encoder_pos  # Update for audio synthesis
 
-        # Apply beat phase locking if music is playing and delay compensation is enabled
-        if play_music and music_analyzer is not None:
-            beat_phase = music_analyzer.current_beat_phase
-
-            # Apply beat phase lock only if delay compensation is enabled
-            if motor_controller.phase_correction_enabled:
-                motor_controller.apply_beat_phase_lock(beat_phase, current_time)
-
-            # Update visualization with beat data
-            if viz_manager:
-                viz_manager.update_beat_rms(beat_phase, motor_controller.bpm)
-
-        # Calculate expected position
+        # 4. Calculate expected position (critical)
         expected_pos = motor_controller.calculate_expected_position(current_time)
 
-        # Record data if recorder is active
-        if data_recorder and data_recorder.is_recording():
-            original_pos = motor_controller.calculate_original_position(current_time)
-            user_amp = motor_controller.get_user_amplitude()
-            data_recorder.record_sample(user_amp, original_pos, expected_pos)
-
-        # Calculate position error
+        # 5. Calculate position error (critical)
         position_error = expected_pos - current_encoder_pos
 
-        # Update statistics
-        motor_controller.update_statistics(position_error)
+        # 6. Update statistics (Optimization 3: reduced frequency, lightweight, needed for phase correction)
+        if iteration % stats_update_interval == 0:
+            motor_controller.update_statistics(position_error)
 
-        # Apply position-based phase correction only if delay compensation is enabled
-        if motor_controller.phase_correction_enabled:
+        # 7. Apply phase corrections if enabled (critical for sync)
+        # (Optimization 2: pre-calculated conditional, Optimization 4: cached beat_phase)
+        if phase_correction_active:
+            # Cache beat phase reading to avoid property access overhead (Optimization 4)
+            beat_phase = music_analyzer.current_beat_phase
+            motor_controller.apply_beat_phase_lock(beat_phase, current_time)
+            motor_controller.apply_position_phase_correction()
+        elif motor_controller.phase_correction_enabled:
+            # Position-based correction only (no music)
             motor_controller.apply_position_phase_correction()
 
-        # Send motor command
+        # 8. Send motor command (critical)
         motor_controller.send_motor_command(expected_pos)
 
-        # Update visualization
-        if viz_manager:
-            # Get feedback position (might be different from command in simulation)
-            feedback_pos = motor_controller.get_current_encoder_position()
-            viz_manager.update_position(expected_pos, feedback_pos)
-
-        # Display status every 30 iterations (~0.5 seconds at 60Hz)
-        if iteration % 250 == 0:
-            complexity = music_analyzer.current_complexity if music_analyzer else 0.0
-            motor_controller.print_status(current_time, position_error, complexity)
-
-        # Wait until next control interval
-        current_wall_time = time.time()
+        # 9. Timing control (critical) - reuse current_wall_time from step 1
         sleep_time = next_control_time - current_wall_time
         if sleep_time > 0:
             time.sleep(sleep_time)
 
         next_control_time += motor_controller.control_period
 
-        # If we've fallen behind, reset
-        if next_control_time < time.time():
-            next_control_time = time.time() + motor_controller.control_period
+        # If we've fallen behind, reset timing
+        if next_control_time < current_wall_time:
+            next_control_time = current_wall_time + motor_controller.control_period
 
         iteration += 1
+
+    # ============================================================================
+    # END CRITICAL CONTROL LOOP
+    # ============================================================================
+
+    # Signal background threads to stop
+    motor_controller.running = False
+
+    # Wait briefly for background threads to finish
+    time.sleep(0.2)
 
     motor_controller.print_final_statistics()
     cleanup_session(play_music, viz_manager, audio_synth)
