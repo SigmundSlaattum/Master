@@ -1,0 +1,15 @@
+# Web Interface Requirements for ODrive Music Control
+# Install with: pip install -r requirements_web.txt
+
+Flask>=2.3.0
+flask-socketio>=5.3.0
+python-socketio>=5.9.0
+
+# Existing dependencies (if not already installed)
+odrive>=0.5.4
+librosa>=0.10.0
+numpy>=1.24.0
+pyaudio>=0.2.13
+pybullet>=3.2.5
+matplotlib>=3.7.0
+pynput>=1.7.6

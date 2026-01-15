@@ -1,0 +1,32 @@
+{
+  "id": "song_001",
+  "name": "Beethoven  Symphony No. 7, 2nd movement  Paavo Ja\u0308rvi and the Deutsche Kammerphilharmonie Bremen",
+  "artist": "Unknown",
+  "duration_s": 449.09714285714284,
+  "bpm": 143.5546875,
+  "path": "song_001",
+  "original_file": "Beethoven_ Symphony No. 7, 2nd movement  Paavo Ja\u0308rvi and the Deutsche Kammerphilharmonie Bremen.mp3",
+  "created_at": "2026-01-15T15:27:52.803988",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 449.09714285714284
+  },
+  "features": {
+    "bpm": 143.5546875,
+    "num_beats": 448,
+    "avg_rms": 0.040329435638680244,
+    "avg_complexity": 0.28709813998692874,
+    "local_tempo_min": 45.12728074931455,
+    "local_tempo_max": 98.50504567128442,
+    "local_tempo_avg": 71.29659764956767,
+    "tempo_variance": 53.37776492196987
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 44910,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true
+  }
+}
