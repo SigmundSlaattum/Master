@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music-Motor Sync Controller</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #000000 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #f7fafc;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #4a5568;
+        }
+
+        h1 { color: #ffffff; margin-bottom: 10px; }
+        h2 { color: #f7fafc; margin-bottom: 15px; font-size: 18px; border-bottom: 2px solid #718096; padding-bottom: 10px; }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-idle { background: #4a5568; }
+        .status-connected { background: #3b82f6; }
+        .status-playing { background: #10b981; }
+        .status-paused { background: #f59e0b; }
+        .status-stopped { background: #ef4444; }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .panel {
+            background: #2d3748;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a5568;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: white;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-primary { background: #667eea; }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; }
+        .btn-warning { background: #f59e0b; }
+        .btn-info { background: #3b82f6; }
+        .btn-secondary { background: #6b7280; }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #4a5568;
+            border-radius: 5px;
+            background: #1a202c;
+            color: #f7fafc;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #10b981;
+        }
+
+        .song-info {
+            background: #1a202c;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #a0aec0;
+        }
+
+        .playback-info {
+            background: #1a202c;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #4a5568;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.1s;
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .playback-controls button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 24px;
+        }
+
+        .slider-group {
+            margin: 15px 0;
+        }
+
+        .slider-group label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            -webkit-appearance: none;
+            background: #4a5568;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #10b981;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            background: #1a202c;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .stat-value { font-size: 20px; font-weight: 600; color: #10b981; }
+        .stat-label { font-size: 12px; color: #a0aec0; }
+
+        .log-panel { grid-column: 1 / -1; }
+
+        .log-container {
+            background: #1e293b;
+            border-radius: 5px;
+            padding: 15px;
+            height: 150px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-left: 3px solid #64748b;
+            padding-left: 10px;
+        }
+
+        .log-info { color: #93c5fd; border-left-color: #3b82f6; }
+        .log-success { color: #86efac; border-left-color: #10b981; }
+        .log-error { color: #fca5a5; border-left-color: #ef4444; }
+        .log-warning { color: #fcd34d; border-left-color: #f59e0b; }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Music-Motor Sync Controller</h1>
+            <div class="status-bar">
+                <span id="statusBadge" class="status-badge status-idle">Idle</span>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <!-- Connection Panel -->
+            <div class="panel">
+                <h2>Connection</h2>
+                <div class="button-grid">
+                    <button id="btnConnect" class="btn-primary" onclick="connect()">Connect</button>
+                    <button id="btnCalibrate" class="btn-info" onclick="calibrate()" disabled>Calibrate</button>
+                    <button id="btnArm" class="btn-success" onclick="armMotor()" disabled>Arm Motor</button>
+                    <button id="btnDisconnect" class="btn-danger" onclick="disconnect()" disabled>Disconnect</button>
+                </div>
+                <button id="btnExit" class="btn-secondary" onclick="exitApp()" style="width: 100%; margin-top: 10px;">Exit Server</button>
+
+                <div class="slider-group">
+                    <label>Latency Offset: <span id="latencyValue">35</span> ms</label>
+                    <input type="range" id="latencySlider" min="0" max="100" value="35" oninput="updateLatency(this.value)">
+                </div>
+            </div>
+
+            <!-- Playback Panel (merged with Song Library) -->
+            <div class="panel">
+                <h2>Playback</h2>
+
+                <label style="display: block; margin-bottom: 8px; font-size: 14px;">Select Song:</label>
+                <select id="songSelect" onchange="selectSong(this.value)">
+                    <option value="">-- Loading songs --</option>
+                </select>
+
+                <div id="songInfo" class="song-info" style="display: none;">
+                    <span id="songArtist"></span> | <span id="songBpm"></span> BPM | <span id="songDuration"></span>
+                </div>
+
+                <div class="playback-info">
+                    <div id="nowPlaying">Select a song to play</div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div id="timeDisplay" style="text-align: center; font-size: 14px;">0:00 / 0:00</div>
+                </div>
+
+                <div class="playback-controls">
+                    <button id="btnPlay" class="btn-success" onclick="play()" disabled>&#9658;</button>
+                    <button id="btnPause" class="btn-warning" onclick="pause()" disabled>&#10074;&#10074;</button>
+                    <button id="btnStop" class="btn-danger" onclick="stop()" disabled>&#9632;</button>
+                </div>
+
+                <div class="slider-group">
+                    <label>Amplitude: <span id="amplitudeValue">1.0</span>x</label>
+                    <input type="range" id="amplitudeSlider" min="0" max="200" value="100" oninput="updateAmplitude(this.value)">
+                </div>
+            </div>
+
+            <!-- Stats Panel -->
+            <div class="panel">
+                <h2>Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div id="statPosition" class="stat-value">0.00</div>
+                        <div class="stat-label">Position (turns)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="statLoopTime" class="stat-value">0</div>
+                        <div class="stat-label">Loop Time (us)</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="statError" class="stat-value">0.000</div>
+                        <div class="stat-label">Position Error</div>
+                    </div>
+                    <div class="stat-item">
+                        <div id="statAmplitude" class="stat-value">1.0x</div>
+                        <div class="stat-label">Amplitude</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Panel -->
+            <div class="panel log-panel">
+                <h2>Log</h2>
+                <div id="logContainer" class="log-container"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io();
+        let selectedSongId = null;
+        let songsData = [];
+        let isConnected = false;
+        let isPlaying = false;
+
+        // Socket events
+        socket.on('connect', () => {
+            log('Connected to server', 'success');
+            loadSongs();
+            loadStatus();
+        });
+
+        socket.on('status', (data) => {
+            log(data.message, data.type);
+        });
+
+        socket.on('playback_status', (data) => {
+            updatePlaybackStatus(data);
+        });
+
+        socket.on('playback_finished', () => {
+            isPlaying = false;
+            updateButtons();
+            document.getElementById('statusBadge').textContent = 'Stopped';
+            document.getElementById('statusBadge').className = 'status-badge status-stopped';
+        });
+
+        // API calls
+        async function loadSongs() {
+            try {
+                const response = await fetch('/api/songs');
+                const data = await response.json();
+                if (data.success) {
+                    songsData = data.songs;
+                    renderSongDropdown(data.songs);
+                }
+            } catch (e) {
+                log('Failed to load songs: ' + e, 'error');
+            }
+        }
+
+        async function loadStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                if (data.success) {
+                    isConnected = data.connected;
+                    isPlaying = data.running;
+                    document.getElementById('latencySlider').value = data.latency_offset_ms;
+                    document.getElementById('latencyValue').textContent = Math.round(data.latency_offset_ms);
+                    updateButtons();
+                }
+            } catch (e) {
+                console.error('Failed to load status:', e);
+            }
+        }
+
+        async function connect() {
+            try {
+                const response = await fetch('/api/connect', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                const data = await response.json();
+                if (data.success) {
+                    isConnected = true;
+                    updateButtons();
+                    document.getElementById('statusBadge').textContent = 'Connected';
+                    document.getElementById('statusBadge').className = 'status-badge status-connected';
+                }
+            } catch (e) {
+                log('Connect failed: ' + e, 'error');
+            }
+        }
+
+        async function calibrate() {
+            try {
+                await fetch('/api/calibrate', {method: 'POST'});
+            } catch (e) {
+                log('Calibrate failed: ' + e, 'error');
+            }
+        }
+
+        async function armMotor() {
+            try {
+                await fetch('/api/arm', {method: 'POST'});
+            } catch (e) {
+                log('Arm failed: ' + e, 'error');
+            }
+        }
+
+        async function disconnect() {
+            try {
+                await fetch('/api/disconnect', {method: 'POST'});
+                isConnected = false;
+                isPlaying = false;
+                updateButtons();
+                document.getElementById('statusBadge').textContent = 'Idle';
+                document.getElementById('statusBadge').className = 'status-badge status-idle';
+            } catch (e) {
+                log('Disconnect failed: ' + e, 'error');
+            }
+        }
+
+        async function exitApp() {
+            if (!confirm('Are you sure you want to shut down the server?')) {
+                return;
+            }
+            try {
+                log('Shutting down server...', 'warning');
+                await fetch('/api/exit', {method: 'POST'});
+                document.getElementById('statusBadge').textContent = 'Offline';
+                document.getElementById('statusBadge').className = 'status-badge status-stopped';
+                document.getElementById('btnExit').disabled = true;
+                log('Server shutdown initiated. You can close this window.', 'info');
+            } catch (e) {
+                log('Server may have already shut down', 'info');
+            }
+        }
+
+        async function play() {
+            if (!selectedSongId) {
+                log('Please select a song first', 'warning');
+                return;
+            }
+            try {
+                const response = await fetch('/api/play', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({song_id: selectedSongId})
+                });
+                const data = await response.json();
+                if (data.success) {
+                    isPlaying = true;
+                    updateButtons();
+                    document.getElementById('statusBadge').textContent = 'Playing';
+                    document.getElementById('statusBadge').className = 'status-badge status-playing';
+                } else {
+                    log('Play failed: ' + data.error, 'error');
+                }
+            } catch (e) {
+                log('Play failed: ' + e, 'error');
+            }
+        }
+
+        async function pause() {
+            try {
+                const response = await fetch('/api/pause', {method: 'POST'});
+                const data = await response.json();
+                if (data.success) {
+                    const statusBadge = document.getElementById('statusBadge');
+                    if (data.paused) {
+                        statusBadge.textContent = 'Paused';
+                        statusBadge.className = 'status-badge status-paused';
+                    } else {
+                        statusBadge.textContent = 'Playing';
+                        statusBadge.className = 'status-badge status-playing';
+                    }
+                }
+            } catch (e) {
+                log('Pause failed: ' + e, 'error');
+            }
+        }
+
+        async function stop() {
+            try {
+                await fetch('/api/stop', {method: 'POST'});
+                isPlaying = false;
+                updateButtons();
+                document.getElementById('statusBadge').textContent = 'Stopped';
+                document.getElementById('statusBadge').className = 'status-badge status-stopped';
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('timeDisplay').textContent = '0:00 / 0:00';
+            } catch (e) {
+                log('Stop failed: ' + e, 'error');
+            }
+        }
+
+        async function updateLatency(value) {
+            document.getElementById('latencyValue').textContent = value;
+            try {
+                await fetch('/api/latency', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({latency_ms: parseFloat(value)})
+                });
+            } catch (e) {
+                console.error('Failed to update latency:', e);
+            }
+        }
+
+        async function updateAmplitude(value) {
+            const amplitude = value / 100;
+            document.getElementById('amplitudeValue').textContent = amplitude.toFixed(1);
+            document.getElementById('statAmplitude').textContent = amplitude.toFixed(1) + 'x';
+            try {
+                await fetch('/api/amplitude', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({amplitude})
+                });
+            } catch (e) {
+                console.error('Failed to update amplitude:', e);
+            }
+        }
+
+        // UI helpers
+        function renderSongDropdown(songs) {
+            const select = document.getElementById('songSelect');
+            if (songs.length === 0) {
+                select.innerHTML = '<option value="">-- No songs available --</option>';
+                return;
+            }
+
+            select.innerHTML = '<option value="">-- Select a song --</option>' +
+                songs.map(song =>
+                    `<option value="${song.id}">${song.name} - ${song.artist}</option>`
+                ).join('');
+        }
+
+        function selectSong(songId) {
+            selectedSongId = songId;
+            const songInfo = document.getElementById('songInfo');
+            const nowPlaying = document.getElementById('nowPlaying');
+
+            if (songId && songsData.length > 0) {
+                const song = songsData.find(s => s.id === songId);
+                if (song) {
+                    document.getElementById('songArtist').textContent = song.artist;
+                    document.getElementById('songBpm').textContent = song.bpm;
+                    document.getElementById('songDuration').textContent = song.duration_str;
+                    songInfo.style.display = 'block';
+                    nowPlaying.textContent = song.name;
+                }
+            } else {
+                songInfo.style.display = 'none';
+                nowPlaying.textContent = 'Select a song to play';
+            }
+
+            updateButtons();
+        }
+
+        function updateButtons() {
+            document.getElementById('btnConnect').disabled = isConnected;
+            document.getElementById('btnCalibrate').disabled = !isConnected;
+            document.getElementById('btnArm').disabled = !isConnected;
+            document.getElementById('btnDisconnect').disabled = !isConnected;
+
+            document.getElementById('btnPlay').disabled = !isConnected || !selectedSongId || isPlaying;
+            document.getElementById('btnPause').disabled = !isPlaying;
+            document.getElementById('btnStop').disabled = !isPlaying;
+        }
+
+        function updatePlaybackStatus(data) {
+            const pct = (data.current_time / data.duration) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('timeDisplay').textContent =
+                formatTime(data.current_time) + ' / ' + formatTime(data.duration);
+            document.getElementById('statPosition').textContent = data.target_position.toFixed(2);
+            document.getElementById('statLoopTime').textContent = Math.round(data.loop_time_us);
+            document.getElementById('statError').textContent = data.position_error.toFixed(3);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return mins + ':' + secs.toString().padStart(2, '0');
+        }
+
+        function log(message, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            const time = new Date().toLocaleTimeString();
+            entry.textContent = `[${time}] ${message}`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Initialize
+        updateButtons();
+    </script>
+</body>
+</html>

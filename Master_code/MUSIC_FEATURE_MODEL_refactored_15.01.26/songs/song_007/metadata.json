@@ -1,0 +1,27 @@
+{
+  "id": "song_007",
+  "name": "Made Me Like This",
+  "artist": "Unknown",
+  "duration_s": 317.50965986394556,
+  "bpm": 126.04801829268293,
+  "path": "song_007",
+  "original_file": "Made_Me_Like_This.mp3",
+  "created_at": "2026-01-14T13:05:28.990377",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 317.50965986394556
+  },
+  "features": {
+    "bpm": 126.04801829268293,
+    "num_beats": 671,
+    "avg_rms": 0.7281458535307451,
+    "avg_complexity": 0.7364978094945682
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 31751,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5
+  }
+}
