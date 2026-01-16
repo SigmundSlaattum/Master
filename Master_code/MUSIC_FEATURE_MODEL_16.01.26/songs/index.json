@@ -1,0 +1,115 @@
+{
+  "version": 1,
+  "songs": [
+    {
+      "id": "song_001",
+      "name": "Beethoven  Symphony No. 7, 2nd movement  Paavo Ja\u0308rvi and the Deutsche Kammerphilharmonie Bremen",
+      "artist": "Unknown",
+      "duration_s": 449.09714285714284,
+      "bpm": 143.5546875,
+      "path": "song_001",
+      "original_file": "Beethoven_ Symphony No. 7, 2nd movement  Paavo Ja\u0308rvi and the Deutsche Kammerphilharmonie Bremen.mp3",
+      "created_at": "2026-01-15T15:27:52.803988"
+    },
+    {
+      "id": "song_002",
+      "name": "Outsider",
+      "artist": "Machine Head",
+      "duration_s": 232.19954648526078,
+      "bpm": 126.0,
+      "path": "song_002",
+      "original_file": "MACHINE HEAD - OUTSIDER.mp3",
+      "created_at": "2026-01-15T15:28:58.959702"
+    },
+    {
+      "id": "song_003",
+      "name": "Locust",
+      "artist": "Machine Head",
+      "duration_s": 375.81496598639455,
+      "bpm": 118.0,
+      "path": "song_003",
+      "original_file": "Machine Head - Locust.mp3",
+      "created_at": "2026-01-15T15:29:24.586160"
+    },
+    {
+      "id": "song_004",
+      "name": "Goodnight",
+      "artist": "Husko",
+      "duration_s": 230.1097505668934,
+      "bpm": 128.0,
+      "path": "song_004",
+      "original_file": "Husko - Goodnight.mp3",
+      "created_at": "2026-01-15T15:30:00.356533"
+    },
+    {
+      "id": "song_005",
+      "name": "Lacrimosa",
+      "artist": "Mozart",
+      "duration_s": 200.41142857142856,
+      "bpm": 135.99917763157896,
+      "path": "song_005",
+      "original_file": "Mozart - Lacrimosa.mp3",
+      "created_at": "2026-01-15T15:30:24.681583"
+    },
+    {
+      "id": "song_006",
+      "name": "Made Me Like This",
+      "artist": "Unknown",
+      "duration_s": 317.50965986394556,
+      "bpm": 129.19921875,
+      "path": "song_006",
+      "original_file": "Made_Me_Like_This.mp3",
+      "created_at": "2026-01-15T15:30:46.037067"
+    },
+    {
+      "id": "song_007",
+      "name": "Serenade",
+      "artist": "Schubert",
+      "duration_s": 382.13079365079363,
+      "bpm": 129.19921875,
+      "path": "song_007",
+      "original_file": "Schubert - Serenade.mp3",
+      "created_at": "2026-01-15T15:31:11.069693"
+    },
+    {
+      "id": "song_008",
+      "name": "Davidian",
+      "artist": "Machine Head",
+      "duration_s": 269.0031746031746,
+      "bpm": 147.0,
+      "path": "song_008",
+      "original_file": "Machine Head - Davidian.mp3",
+      "created_at": "2026-01-15T15:31:53.920702"
+    },
+    {
+      "id": "song_009",
+      "name": "For Whom The Bell Tolls",
+      "artist": "Metallica",
+      "duration_s": 309.97333333333336,
+      "bpm": 118.0,
+      "path": "song_009",
+      "original_file": "For Whom The Bell Tolls (Remastered).mp3",
+      "created_at": "2026-01-15T15:32:36.671715"
+    },
+    {
+      "id": "song_010",
+      "name": "Can't Feel My Face (Official Video)",
+      "artist": "The Weeknd",
+      "duration_s": 218.45333333333335,
+      "bpm": 107.666015625,
+      "path": "song_010",
+      "original_file": "The Weeknd - Can't Feel My Face (Official Video).mp3",
+      "created_at": "2026-01-15T15:39:28.495094"
+    },
+    {
+      "id": "song_011",
+      "name": "Lacrimosa",
+      "artist": "Mozart",
+      "duration_s": 200.41142857142856,
+      "bpm": 67.99958881578948,
+      "path": "song_011",
+      "original_file": "Mozart - Lacrimosa.mp3",
+      "created_at": "2026-01-15T15:47:04.918113"
+    }
+  ]
+}

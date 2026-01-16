@@ -1,0 +1,32 @@
+{
+  "id": "song_007",
+  "name": "Serenade",
+  "artist": "Schubert",
+  "duration_s": 382.13079365079363,
+  "bpm": 129.19921875,
+  "path": "song_007",
+  "original_file": "Schubert - Serenade.mp3",
+  "created_at": "2026-01-15T15:31:11.069693",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 382.13079365079363
+  },
+  "features": {
+    "bpm": 129.19921875,
+    "num_beats": 773,
+    "avg_rms": 0.20357761218952486,
+    "avg_complexity": 0.425001646623353,
+    "local_tempo_min": 71.56489495243194,
+    "local_tempo_max": 147.92095501054874,
+    "local_tempo_avg": 127.11433477110309,
+    "tempo_variance": 76.3560600581168
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 38214,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true
+  }
+}

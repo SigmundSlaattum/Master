@@ -1,0 +1,43 @@
+{
+  "id": "song_002",
+  "name": "Goodnight",
+  "artist": "Husko",
+  "duration_s": 230.1097505668934,
+  "bpm": 128.0,
+  "path": "song_002",
+  "original_file": "audio.wav",
+  "created_at": "2026-01-16T11:16:06.847994",
+  "extraction_mode": "legacy",
+  "window_size": 1.0,
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 230.1097505668934
+  },
+  "features": {
+    "bpm": 128.0,
+    "num_beats": 481,
+    "avg_rms": 0.7923209693081482,
+    "avg_complexity": 0.8490136300762955,
+    "rms_range": [
+      0.00016985183538054116,
+      1.0
+    ],
+    "complexity_range": [
+      0.2669006798910204,
+      0.9499360118518235
+    ],
+    "local_tempo_min": 76.17560975609756,
+    "local_tempo_max": 141.71428571428743,
+    "local_tempo_avg": 125.50804599944728,
+    "tempo_variance": 65.53867595818987
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 23011,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true
+  },
+  "custom_latency_ms": 78.0
+}
