@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "songs": [
+    {
+      "id": "song_001",
+      "name": "Lacrimosa",
+      "artist": "Mozart",
+      "duration_s": 200.41142857142856,
+      "bpm": 67.99958881578948,
+      "path": "song_001",
+      "original_file": "audio.wav",
+      "created_at": "2026-01-19T13:11:20.213720"
+    },
+    {
+      "id": "song_002",
+      "name": "For Whom The Bell Tolls",
+      "artist": "Metallica",
+      "duration_s": 309.97333333333336,
+      "bpm": 118.0,
+      "path": "song_002",
+      "original_file": "audio.wav",
+      "created_at": "2026-01-19T13:13:49.189119"
+    },
+    {
+      "id": "song_003",
+      "name": "Can't Feel My Face (Official Video)",
+      "artist": "The Weeknd",
+      "duration_s": 218.45333333333335,
+      "bpm": 107.666015625,
+      "path": "song_003",
+      "original_file": "audio.wav",
+      "created_at": "2026-01-19T13:15:53.807529"
+    },
+    {
+      "id": "song_004",
+      "name": "Goodnight",
+      "artist": "Husko",
+      "duration_s": 230.1097505668934,
+      "bpm": 128.0,
+      "path": "song_004",
+      "original_file": "audio.wav",
+      "created_at": "2026-01-19T13:17:03.098926"
+    }
+  ]
+}

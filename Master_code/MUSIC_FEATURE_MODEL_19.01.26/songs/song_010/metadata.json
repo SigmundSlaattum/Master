@@ -1,0 +1,32 @@
+{
+  "id": "song_010",
+  "name": "Can't Feel My Face (Official Video)",
+  "artist": "The Weeknd",
+  "duration_s": 218.45333333333335,
+  "bpm": 107.666015625,
+  "path": "song_010",
+  "original_file": "The Weeknd - Can't Feel My Face (Official Video).mp3",
+  "created_at": "2026-01-15T15:39:28.495094",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 218.45333333333335
+  },
+  "features": {
+    "bpm": 107.666015625,
+    "num_beats": 356,
+    "avg_rms": 0.6740670340279215,
+    "avg_complexity": 0.743969400583772,
+    "local_tempo_min": 63.756981382979525,
+    "local_tempo_max": 118.95953383531221,
+    "local_tempo_avg": 103.63625589609978,
+    "tempo_variance": 55.20255245233269
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 21846,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true
+  }
+}
