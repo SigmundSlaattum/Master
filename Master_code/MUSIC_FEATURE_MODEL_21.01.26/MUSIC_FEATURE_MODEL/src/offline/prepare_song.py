@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 Song Preparation CLI

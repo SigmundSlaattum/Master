@@ -56,6 +56,7 @@ class SystemState:
         # Bluetooth remote control
         self.bluetooth = BluetoothController()
         self.bluetooth_user_amplitude = 0.5  # Track amplitude from remote
+        self.amplitude_locked = False  # Lock amplitude control (e.g., during no-motion trials)
 
         # Data recorder
         self.data_recorder = DataRecorder()
@@ -95,6 +96,9 @@ state = SystemState()
 # Bluetooth callbacks
 def on_bluetooth_amplitude_change(amplitude: float):
     """Callback when Bluetooth remote changes amplitude."""
+    # Ignore amplitude changes when locked (e.g., during no-motion trials)
+    if state.amplitude_locked:
+        return
     state.bluetooth_user_amplitude = amplitude
     # Update the playback controller if playing
     if state.controller is not None and state.controller.is_playing():
@@ -584,6 +588,43 @@ def _save_study_data_background(trial, data_recorder, user_study):
             'message': f'Error saving data: {str(e)}',
             'type': 'error'
         })
+
+
+def _save_study_trial_list(user_study):
+    """Save the trial list to a text file in the study output folder."""
+    try:
+        summary = user_study.get_completed_trials_summary()
+        if not summary:
+            return
+
+        # Get output directory
+        base_dir = Path(__file__).parent.parent / 'user_study_data'
+        folder_name = user_study.get_folder_name()
+        if folder_name:
+            output_dir = base_dir / folder_name
+        else:
+            output_dir = base_dir / 'unnamed_study'
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Write trial list to file
+        filepath = output_dir / 'trial_list.txt'
+        with open(filepath, 'w') as f:
+            f.write(f"User Study Trial List\n")
+            f.write(f"{'=' * 50}\n\n")
+            f.write(f"Total trials: {len(summary)}\n\n")
+            f.write(f"{'#':<4} {'Song':<30} {'Pattern':<10} {'Library':<10} {'Tempo':<10}\n")
+            f.write(f"{'-' * 70}\n")
+
+            for trial in summary:
+                f.write(f"{trial['trial_number']:<4} "
+                       f"{trial['song_name']:<30} "
+                       f"{trial['pattern']:<10} "
+                       f"{trial['library']:<10} "
+                       f"{trial['tempo_mode']:<10}\n")
+
+        print(f"[UserStudy] Trial list saved to {filepath}")
+    except Exception as e:
+        print(f"[UserStudy] Error saving trial list: {e}")
 
 
 @app.route('/api/stop', methods=['POST'])
@@ -1158,6 +1199,9 @@ def user_study_play():
         # Get user amplitude for this pattern
         user_amplitude = state.user_study.get_user_amplitude(trial.pattern)
 
+        # Lock amplitude if this is a no-motion trial (amplitude = 0)
+        state.amplitude_locked = (user_amplitude == 0)
+
         # Get initial position
         state.initial_position = state.odrv0.axis0.encoder.pos_estimate
 
@@ -1204,6 +1248,7 @@ def user_study_play():
 
             state.status = "stopped"
             state.current_song_id = None
+            state.amplitude_locked = False  # Unlock amplitude control
 
             # Emit trial completion and study progress
             progress = state.user_study.get_study_progress()
@@ -1268,6 +1313,8 @@ def user_study_complete_trial():
         progress = state.user_study.get_study_progress()
 
         if next_trial is None:
+            # Save trial list to file
+            _save_study_trial_list(state.user_study)
             socketio.emit('status', {'message': 'User study complete!', 'type': 'success'})
             socketio.emit('user_study_complete', {
                 'completed_trials': state.user_study.get_completed_trials_summary()
