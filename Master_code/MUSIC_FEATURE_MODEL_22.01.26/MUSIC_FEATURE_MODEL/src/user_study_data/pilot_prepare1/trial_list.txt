@@ -1,0 +1,16 @@
+User Study Trial List
+==================================================
+
+Total trials: 9
+
+#    Song                           Pattern    Library    Tempo     
+----------------------------------------------------------------------
+1    So Easy                        complex    standard   fixed     
+2    So Easy                        none       standard   fixed     
+3    So Easy                        simple     standard   fixed     
+4    So Easy                        complex    legacy     fixed     
+5    So Easy                        none       legacy     fixed     
+6    So Easy                        simple     legacy     fixed     
+7    Lacrimosa                      complex    standard   dynamic   
+8    Lacrimosa                      none       standard   dynamic   
+9    Lacrimosa                      simple     standard   dynamic   

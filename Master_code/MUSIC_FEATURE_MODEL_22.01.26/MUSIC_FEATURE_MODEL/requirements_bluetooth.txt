@@ -1,0 +1,2 @@
+# Additional requirements for Bluetooth remote control feature
+bleak>=0.21.0  # Bluetooth Low Energy platform Agnostic Klient

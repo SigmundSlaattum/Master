@@ -1,0 +1,45 @@
+{
+  "id": "song_004",
+  "name": "For Whom The Bell Tolls (Remastered)",
+  "artist": "Metallica",
+  "duration_s": 309.97333333333336,
+  "bpm": 118.0,
+  "path": "song_004",
+  "original_file": "For Whom The Bell Tolls (Remastered).mp3",
+  "created_at": "2026-01-21T09:39:27.068593",
+  "extraction_mode": "legacy",
+  "window_size": 1.0,
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 309.97333333333336
+  },
+  "features": {
+    "bpm": 118.0,
+    "num_beats": 566,
+    "avg_rms": 0.6048320463417977,
+    "avg_complexity": 0.7767114790239366,
+    "rms_range": [
+      5.8784660723176785e-05,
+      0.8176471889019012
+    ],
+    "complexity_range": [
+      0.15030423261700235,
+      0.9334684512728174
+    ],
+    "local_tempo_min": 66.30086339808808,
+    "local_tempo_max": 129.56791924287268,
+    "local_tempo_avg": 114.40223761894579,
+    "tempo_variance": 63.26705584478459
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 30998,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true,
+    "has_simple_pattern": true,
+    "half_freq_simple": false,
+    "half_freq_complex": false
+  }
+}
