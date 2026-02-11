@@ -1,0 +1,38 @@
+{
+  "id": "song_004",
+  "name": "Blue Swan 5",
+  "artist": "Infected Mushroom",
+  "duration_s": 538.1688888888889,
+  "bpm": 143.5546875,
+  "path": "song_004",
+  "original_file": "Infected Mushroom - Blue Swan 5.mp3",
+  "created_at": "2026-01-29T13:32:12.551963",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 538.1688888888889
+  },
+  "features": {
+    "bpm": 143.5546875,
+    "num_beats": 1237,
+    "avg_rms": 0.42127904955322626,
+    "avg_complexity": 0.5645597384704382,
+    "local_tempo_min": 86.1328124999977,
+    "local_tempo_max": 162.91913076303632,
+    "local_tempo_avg": 143.09659736844523,
+    "tempo_variance": 76.78631826303862
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 53817,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true,
+    "has_simple_pattern": true,
+    "half_freq_simple": false,
+    "half_freq_complex": false,
+    "motor_rpm_max": 5500.0,
+    "amplitude_attenuation_enabled": true
+  },
+  "default_amplitude": 0.25
+}

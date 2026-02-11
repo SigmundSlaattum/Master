@@ -1,0 +1,26 @@
+# Music-Motor Sync Controller - Python Dependencies
+#
+# Install with pip:
+#   pip install -r setup/requirements.txt
+#
+# Install with conda (create environment first, then use pip inside it):
+#   conda create -n music-motor python=3.10
+#   conda activate music-motor
+#   pip install -r setup/requirements.txt
+
+# --- Core runtime ---
+numpy>=1.24.0
+scipy>=1.10.0
+sounddevice>=0.4.6
+librosa>=0.10.0
+matplotlib>=3.7.0
+
+# --- Web interface ---
+Flask>=2.3.0
+flask-socketio>=5.3.0
+
+# --- Bluetooth remote control ---
+bleak>=0.21.0
+
+# --- Motor controller ---
+odrive>=0.5.4

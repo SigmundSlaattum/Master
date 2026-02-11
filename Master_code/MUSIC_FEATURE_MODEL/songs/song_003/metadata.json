@@ -1,0 +1,43 @@
+{
+  "id": "song_003",
+  "name": "Is There Anybody Out There",
+  "artist": "MACHINE HEAD",
+  "duration_s": 292.38566893424036,
+  "bpm": 178.20581896551724,
+  "path": "song_003",
+  "original_file": "MACHINE HEAD - Is There Anybody Out There.mp3",
+  "created_at": "2026-01-29T13:12:12.040791",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 292.38566893424036
+  },
+  "features": {
+    "bpm": 178.20581896551724,
+    "num_beats": 434,
+    "avg_rms": 0.6981484078493013,
+    "avg_complexity": 0.8118313673639366,
+    "local_tempo_min": 107.54877495462796,
+    "local_tempo_max": 208.47835066109658,
+    "local_tempo_avg": 178.50121751389102,
+    "tempo_variance": 100.92957570646863
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 29239,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true,
+    "has_simple_pattern": true,
+    "half_freq_simple": true,
+    "half_freq_complex": false,
+    "motor_rpm_max": 5500.0,
+    "amplitude_attenuation_enabled": true
+  },
+  "pattern_latencies": {
+    "simple": -139.0,
+    "complex": -93.0
+  },
+  "custom_latency_ms": -93.0,
+  "default_amplitude": 0.2
+}

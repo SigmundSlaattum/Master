@@ -1,0 +1,43 @@
+{
+  "id": "song_002",
+  "name": "Lacrimosa",
+  "artist": "Mozart",
+  "duration_s": 200.41142857142856,
+  "bpm": 125.0,
+  "path": "song_002",
+  "original_file": "Mozart - Lacrimosa.mp3",
+  "created_at": "2026-01-29T14:37:12.068815",
+  "audio": {
+    "sample_rate": 44100,
+    "channels": 2,
+    "duration_seconds": 200.41142857142856
+  },
+  "features": {
+    "bpm": 125.0,
+    "num_beats": 524,
+    "avg_rms": 0.13668291381004702,
+    "avg_complexity": 0.2747364997060416,
+    "local_tempo_min": 74.99999999999997,
+    "local_tempo_max": 141.12839538314563,
+    "local_tempo_avg": 117.4297037209215,
+    "tempo_variance": 66.12839538314566
+  },
+  "trajectory": {
+    "resolution_ms": 10.0,
+    "num_samples": 20042,
+    "gear_ratio": 15.0,
+    "max_amplitude": 7.5,
+    "has_dynamic_tempo": true,
+    "has_simple_pattern": true,
+    "half_freq_simple": false,
+    "half_freq_complex": false,
+    "motor_rpm_max": 5500.0,
+    "amplitude_attenuation_enabled": true
+  },
+  "pattern_latencies": {
+    "complex": -29.0,
+    "simple": -45.0
+  },
+  "custom_latency_ms": -45.0,
+  "default_amplitude": 0.4
+}

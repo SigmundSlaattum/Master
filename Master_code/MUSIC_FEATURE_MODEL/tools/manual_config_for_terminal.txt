@@ -1,0 +1,51 @@
+INSERT ALL COMMANDS ONE BY ONE FOR CLIBRATING THE ODRIVE (V3.6) TO THE MOTOR.
+
+odrv0.axis0.motor.config.pole_pairs = 7
+odrv0.axis0.motor.config.calibration_current = 30
+odrv0.axis0.motor.config.resistance_calib_max_voltage = 4
+odrv0.axis0.motor.config.motor_type = MOTOR_TYPE_HIGH_CURRENT
+odrv0.axis0.motor.config.current_lim = 80
+
+# Configure encoder (CUI AMT102-V)
+odrv0.axis0.encoder.config.mode = ENCODER_MODE_INCREMENTAL
+odrv0.axis0.encoder.config.cpr = 8192  # AMT102-V has 2048 PPR = 8192 CPR
+
+# Set controller mode
+odrv0.axis0.controller.config.control_mode = CONTROL_MODE_POSITION_CONTROL
+
+# Set calibration sequence
+odrv0.axis0.config.startup_encoder_offset_calibration = True
+odrv0.axis0.config.startup_motor_calibration = True  # Set to True first time only
+
+# Configure de-accelleration rate and velocity:
+odrv0.axis0.controller.config.vel_limit = 50
+odrv0.axis0.controller.config.vel_limit_tolerance = 1.5
+odrv0.axis0.trap_traj.config.accel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
+odrv0.axis0.trap_traj.config.decel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
+odrv0.axis0.controller.config.pos_gain = 30
+
+
+# ---- breake resistance and related parameters ----
+odrv0.config.brake_resistance = 2.0
+
+# Configure DC bus overvoltage protection
+odrv0.config.dc_bus_overvoltage_trip_level = 40
+
+# Enable overvoltage ramp (helps with regen braking)
+odrv0.config.enable_dc_bus_overvoltage_ramp = True
+odrv0.config.dc_bus_overvoltage_ramp_start = 36  # Start ramping down power
+odrv0.config.dc_bus_overvoltage_ramp_end = 38    # Full brake at this voltage
+
+# Allow some regenerative current
+odrv0.config.dc_max_positive_current = 20    # Increase from 10
+odrv0.config.dc_max_negative_current = -10   # Allow MORE regen current (was -3)
+
+
+# ---- END break resistance and related parameters
+
+# Save and reboot
+odrv0.save_configuration()
+odrv0.reboot()
+
+
+Implementer et lavpassfiltyer av typen IIR. Et poeng er at det må være kort, ikke for kompleks pga latency
