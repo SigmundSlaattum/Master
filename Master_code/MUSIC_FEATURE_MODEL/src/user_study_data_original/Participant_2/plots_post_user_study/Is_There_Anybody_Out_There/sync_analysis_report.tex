@@ -1,0 +1,65 @@
+% Synchronization Report — Is There Anybody Out There
+% Participant: Participant_2
+% Half-period correction: offsets wrapped modulo half beat period
+% Outlier threshold: mean + N*std (per condition)
+
+\section*{Synchronization Report --- Is There Anybody Out There}
+
+\subsection*{Per-Condition Statistics}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Metric & Complex & Simple \\
+\hline
+Total peaks & 114 & 110 \\
+Outlier threshold (ms) & 4.8 & 6.5 \\
+Peaks retained & 112 & 104 \\
+\textbf{Mean abs offset (ms)} & \textbf{1.81} & \textbf{1.98} \\
+Median abs offset (ms) & 1.67 & 1.68 \\
+Std abs offset (ms) & 1.09 & 1.78 \\
+Min abs offset (ms) & 0.02 & 0.00 \\
+Max abs offset (ms) & 4.73 & 6.19 \\
+\hline
+\end{tabular}
+\caption{Per-condition synchronization statistics for Is There Anybody Out There.}
+\label{tab:sync_stats}
+\end{table}
+
+\subsection*{Accuracy Thresholds}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Within threshold & Complex & Simple \\
+\hline
+$\leq$ 1 ms & 25.0\% & 33.7\% \\
+$\leq$ 2 ms & 59.8\% & 58.7\% \\
+$\leq$ 5 ms & 100.0\% & 92.3\% \\
+$\leq$ 10 ms & 100.0\% & 100.0\% \\
+\hline
+\end{tabular}
+\caption{Proportion of peaks within accuracy thresholds.}
+\label{tab:sync_accuracy}
+\end{table}
+
+\subsection*{Comparison}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Difference in mean offset & 0.17 ms \\
+Percentage difference & 9.3\% \\
+Better condition & \textbf{Complex} \\
+\hline
+\end{tabular}
+\caption{Comparison of synchronization conditions.}
+\label{tab:sync_comparison}
+\end{table}
+
+Complex achieved a mean absolute offset of 1.81~ms, outperforming Simple (1.98~ms) by 0.17~ms (9.3\%).

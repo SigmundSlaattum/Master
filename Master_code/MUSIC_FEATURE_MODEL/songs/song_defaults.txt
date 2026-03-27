@@ -1,0 +1,22 @@
+Song Default Amplitudes and Latencies
+=======================================
+
+song_001: So Easy - Röyksopp
+  BPM:               104.0
+  Default Amplitude:  0.2
+  Pattern Latencies:  simple: -51.0 ms, complex: -27.0 ms
+
+song_002: Lacrimosa - Mozart
+  BPM:               125.0
+  Default Amplitude:  0.4
+  Pattern Latencies:  complex: -29.0 ms, simple: -45.0 ms
+
+song_003: Is There Anybody Out There - MACHINE HEAD
+  BPM:               178.2
+  Default Amplitude:  0.2
+  Pattern Latencies:  simple: -139.0 ms, complex: -61.0 ms
+
+song_004: Blue Swan 5 - Infected Mushroom
+  BPM:               143.6
+  Default Amplitude:  0.25
+  Pattern Latencies:  (none configured)

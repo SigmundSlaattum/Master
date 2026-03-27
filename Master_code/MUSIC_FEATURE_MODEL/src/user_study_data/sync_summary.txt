@@ -1,0 +1,38 @@
+Synchronization Summary — All Participants
+==================================================
+
+Participant_1
+-------------
+  Is There Anybody Out There: Simple achieved a mean absolute offset of 1.92 ms, outperforming Complex (2.09 ms) by 0.17 ms (8.7%).
+  Lacrimosa: Complex achieved a mean absolute offset of 53.06 ms, outperforming Simple (56.37 ms) by 3.31 ms (6.2%).
+  So Easy: Simple achieved a mean absolute offset of 71.21 ms, outperforming Complex (73.18 ms) by 1.97 ms (2.8%).
+
+Participant_2
+-------------
+  Is There Anybody Out There: Complex achieved a mean absolute offset of 1.74 ms, outperforming Simple (2.01 ms) by 0.26 ms (15.2%).
+  Lacrimosa: Complex achieved a mean absolute offset of 54.73 ms, outperforming Simple (58.48 ms) by 3.75 ms (6.8%).
+  So Easy: Simple achieved a mean absolute offset of 70.49 ms, outperforming Complex (78.09 ms) by 7.60 ms (10.8%).
+
+Participant_3
+-------------
+  Is There Anybody Out There: Complex achieved a mean absolute offset of 1.69 ms, outperforming Simple (2.06 ms) by 0.37 ms (21.7%).
+  Lacrimosa: Simple achieved a mean absolute offset of 49.93 ms, outperforming Complex (59.06 ms) by 9.12 ms (18.3%).
+  So Easy: Simple achieved a mean absolute offset of 66.88 ms, outperforming Complex (70.21 ms) by 3.33 ms (5.0%).
+
+Participant_4
+-------------
+  Is There Anybody Out There: Complex achieved a mean absolute offset of 1.63 ms, outperforming Simple (2.01 ms) by 0.38 ms (23.0%).
+  Lacrimosa: Simple achieved a mean absolute offset of 56.94 ms, outperforming Complex (56.98 ms) by 0.04 ms (0.1%).
+  So Easy: Complex achieved a mean absolute offset of 69.22 ms, outperforming Simple (69.34 ms) by 0.13 ms (0.2%).
+
+Participant_5
+-------------
+  Is There Anybody Out There: Complex achieved a mean absolute offset of 1.55 ms, outperforming Simple (2.11 ms) by 0.55 ms (35.6%).
+  Lacrimosa: Simple achieved a mean absolute offset of 49.73 ms, outperforming Complex (64.81 ms) by 15.08 ms (30.3%).
+  So Easy: Simple achieved a mean absolute offset of 71.34 ms, outperforming Complex (85.68 ms) by 14.34 ms (20.1%).
+
+Participant_6
+-------------
+  Is There Anybody Out There: Simple achieved a mean absolute offset of 1.89 ms, outperforming Complex (4.15 ms) by 2.25 ms (119.1%).
+  Lacrimosa: Simple achieved a mean absolute offset of 59.48 ms, outperforming Complex (60.89 ms) by 1.41 ms (2.4%).
+  So Easy: Simple achieved a mean absolute offset of 72.08 ms, outperforming Complex (74.87 ms) by 2.80 ms (3.9%).

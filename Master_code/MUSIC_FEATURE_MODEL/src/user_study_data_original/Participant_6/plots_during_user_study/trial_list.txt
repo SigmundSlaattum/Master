@@ -1,0 +1,16 @@
+User Study Trial List
+==================================================
+
+Total trials: 9
+
+#    Song                           Pattern    Library    Tempo     
+----------------------------------------------------------------------
+1    Lacrimosa                      simple     standard   fixed     
+2    Lacrimosa                      none       standard   fixed     
+3    Lacrimosa                      complex    standard   fixed     
+4    So Easy                        none       standard   fixed     
+5    So Easy                        complex    standard   fixed     
+6    So Easy                        simple     standard   fixed     
+7    Is There Anybody Out There     none       standard   fixed     
+8    Is There Anybody Out There     simple     standard   fixed     
+9    Is There Anybody Out There     complex    standard   fixed     

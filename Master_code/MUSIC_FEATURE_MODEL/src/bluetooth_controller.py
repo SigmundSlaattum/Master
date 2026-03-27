@@ -32,7 +32,7 @@ class BluetoothController:
         # Configuration
         self.encoder_step_size: float = 0.005  # Amplitude change per encoder click
         self.encoder_direction_reversed: bool = True  # Direction toggle (default reversed)
-        self.max_amplitude: float = 1.0  # Maximum user amplitude limit (1.0 = trajectory limit)
+        self.max_amplitude: float = 0.6  # Maximum user amplitude limit (0.6 = safe operating limit)
 
         # Button toggle state
         self.amplitude_before_stop: Optional[float] = None  # Store amplitude before button press

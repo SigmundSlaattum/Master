@@ -1,0 +1,65 @@
+% Synchronization Report — So Easy
+% Participant: Participant_3
+% Half-period correction: offsets wrapped modulo half beat period
+% Outlier threshold: mean + N*std (per condition)
+
+\section*{Synchronization Report --- So Easy}
+
+\subsection*{Per-Condition Statistics}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Metric & Complex & Simple \\
+\hline
+Total peaks & 110 & 104 \\
+Outlier threshold (ms) & 161.3 & 178.9 \\
+Peaks retained & 110 & 104 \\
+\textbf{Mean abs offset (ms)} & \textbf{89.89} & \textbf{106.83} \\
+Median abs offset (ms) & 102.05 & 121.69 \\
+Std abs offset (ms) & 35.70 & 36.02 \\
+Min abs offset (ms) & 25.45 & 0.00 \\
+Max abs offset (ms) & 141.63 & 140.55 \\
+\hline
+\end{tabular}
+\caption{Per-condition synchronization statistics for So Easy.}
+\label{tab:sync_stats}
+\end{table}
+
+\subsection*{Accuracy Thresholds}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Within threshold & Complex & Simple \\
+\hline
+$\leq$ 1 ms & 0.0\% & 7.7\% \\
+$\leq$ 2 ms & 0.0\% & 7.7\% \\
+$\leq$ 5 ms & 0.0\% & 7.7\% \\
+$\leq$ 10 ms & 0.0\% & 7.7\% \\
+\hline
+\end{tabular}
+\caption{Proportion of peaks within accuracy thresholds.}
+\label{tab:sync_accuracy}
+\end{table}
+
+\subsection*{Comparison}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Difference in mean offset & 16.94 ms \\
+Percentage difference & 18.8\% \\
+Better condition & \textbf{Complex} \\
+\hline
+\end{tabular}
+\caption{Comparison of synchronization conditions.}
+\label{tab:sync_comparison}
+\end{table}
+
+Complex achieved a mean absolute offset of 89.89~ms, outperforming Simple (106.83~ms) by 16.94~ms (18.8\%).

@@ -1,0 +1,16 @@
+User Study Trial List
+==================================================
+
+Total trials: 9
+
+#    Song                           Pattern    Library    Tempo     
+----------------------------------------------------------------------
+1    Is There Anybody Out There     simple     standard   fixed     
+2    Is There Anybody Out There     complex    standard   fixed     
+3    Is There Anybody Out There     none       standard   fixed     
+4    Is There Anybody Out There     none       standard   fixed     
+5    Is There Anybody Out There     complex    standard   fixed     
+6    Is There Anybody Out There     simple     standard   fixed     
+7    Is There Anybody Out There     simple     standard   fixed     
+8    Is There Anybody Out There     none       standard   fixed     
+9    Is There Anybody Out There     complex    standard   fixed     

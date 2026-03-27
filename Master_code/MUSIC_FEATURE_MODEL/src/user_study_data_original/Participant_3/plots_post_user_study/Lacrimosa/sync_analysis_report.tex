@@ -1,0 +1,65 @@
+% Synchronization Report — Lacrimosa
+% Participant: Participant_3
+% Half-period correction: offsets wrapped modulo half beat period
+% Outlier threshold: mean + N*std (per condition)
+
+\section*{Synchronization Report --- Lacrimosa}
+
+\subsection*{Per-Condition Statistics}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Metric & Complex & Simple \\
+\hline
+Total peaks & 122 & 121 \\
+Outlier threshold (ms) & 129.7 & 121.8 \\
+Peaks retained & 122 & 121 \\
+\textbf{Mean abs offset (ms)} & \textbf{53.58} & \textbf{50.04} \\
+Median abs offset (ms) & 50.59 & 51.30 \\
+Std abs offset (ms) & 38.05 & 35.89 \\
+Min abs offset (ms) & 0.00 & 0.00 \\
+Max abs offset (ms) & 118.69 & 119.33 \\
+\hline
+\end{tabular}
+\caption{Per-condition synchronization statistics for Lacrimosa.}
+\label{tab:sync_stats}
+\end{table}
+
+\subsection*{Accuracy Thresholds}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|c|}
+\hline
+Within threshold & Complex & Simple \\
+\hline
+$\leq$ 1 ms & 9.0\% & 14.9\% \\
+$\leq$ 2 ms & 9.0\% & 14.9\% \\
+$\leq$ 5 ms & 9.8\% & 14.9\% \\
+$\leq$ 10 ms & 14.8\% & 19.0\% \\
+\hline
+\end{tabular}
+\caption{Proportion of peaks within accuracy thresholds.}
+\label{tab:sync_accuracy}
+\end{table}
+
+\subsection*{Comparison}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|c|}
+\hline
+Metric & Value \\
+\hline
+Difference in mean offset & 3.55 ms \\
+Percentage difference & 7.1\% \\
+Better condition & \textbf{Simple} \\
+\hline
+\end{tabular}
+\caption{Comparison of synchronization conditions.}
+\label{tab:sync_comparison}
+\end{table}
+
+Simple achieved a mean absolute offset of 50.04~ms, outperforming Complex (53.58~ms) by 3.55~ms (7.1\%).

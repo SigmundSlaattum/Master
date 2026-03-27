@@ -36,8 +36,8 @@
   },
   "pattern_latencies": {
     "simple": -139.0,
-    "complex": -93.0
+    "complex": -61.0
   },
-  "custom_latency_ms": -93.0,
+  "custom_latency_ms": -61.0,
   "default_amplitude": 0.2
 }

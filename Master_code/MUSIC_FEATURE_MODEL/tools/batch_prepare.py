@@ -17,7 +17,7 @@ import re
 from pathlib import Path
 
 # Add src to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from offline import prepare_song
 from offline.song_manager import SongManager

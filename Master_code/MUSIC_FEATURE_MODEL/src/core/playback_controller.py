@@ -163,13 +163,13 @@ class PlaybackController:
         Set user amplitude multiplier.
 
         Args:
-            amplitude: Amplitude multiplier (0.0 to 1.0)
-                       Clamped to 1.0 max to prevent motor over-speed
+            amplitude: Amplitude multiplier (0.0 to 0.6)
+                       Clamped to 0.6 max to prevent motor over-speed
                        since trajectory is pre-computed with motor limits.
         """
         with self._user_amplitude_lock:
-            # Clamp to [0.0, 1.0] - trajectory already has motor limits baked in
-            self._user_amplitude = max(0.0, min(1.0, amplitude))
+            # Clamp to [0.0, 0.6] - trajectory already has motor limits baked in
+            self._user_amplitude = max(0.0, min(0.6, amplitude))
 
     def get_user_amplitude(self) -> float:
         """Get current user amplitude multiplier."""

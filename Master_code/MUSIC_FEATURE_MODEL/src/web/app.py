@@ -99,8 +99,8 @@ def on_bluetooth_amplitude_change(amplitude: float):
     # Ignore amplitude changes when locked (e.g., during no-motion trials)
     if state.amplitude_locked:
         return
-    # Clamp to [0.0, 1.0] - trajectory has motor limits baked in
-    amplitude = max(0.0, min(1.0, amplitude))
+    # Clamp to [0.0, 0.6] - trajectory has motor limits baked in
+    amplitude = max(0.0, min(0.6, amplitude))
     state.bluetooth_user_amplitude = amplitude
     # Update the playback controller if playing
     if state.controller is not None and state.controller.is_playing():
@@ -697,9 +697,9 @@ def set_amplitude():
 
     try:
         data = request.json or {}
-        amplitude = float(data.get('amplitude', 1.0))
-        # Clamp to [0.0, 1.0] - trajectory has motor limits baked in
-        amplitude = max(0.0, min(1.0, amplitude))
+        amplitude = float(data.get('amplitude', 0.6))
+        # Clamp to [0.0, 0.6] - trajectory has motor limits baked in
+        amplitude = max(0.0, min(0.6, amplitude))
         state.controller.set_user_amplitude(amplitude)
         return jsonify({'success': True, 'amplitude': amplitude})
     except Exception as e:
