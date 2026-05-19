@@ -226,7 +226,10 @@ def configure_odrive(odrv0):
 
 
     # Configure de-accelleration rate and velocity:
-    odrv0.axis0.controller.config.vel_limit = 50
+    # Hard overspeed roof at 6500 RPM (108.33 turns/s)
+    # vel_limit × vel_limit_tolerance = overspeed trip threshold
+    # 72.22 × 1.5 = 108.33 turns/s ≈ 6500 RPM
+    odrv0.axis0.controller.config.vel_limit = 72.22
     odrv0.axis0.controller.config.vel_limit_tolerance = 1.5
     odrv0.axis0.trap_traj.config.accel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
     odrv0.axis0.trap_traj.config.decel_limit = 10  # i have tried 6 because of BUS OVERVOLTAGE
