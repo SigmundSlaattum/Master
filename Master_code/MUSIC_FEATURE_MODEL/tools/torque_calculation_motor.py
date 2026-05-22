@@ -92,6 +92,7 @@ def angle_of_max_torque():
 
 def print_clean_angles_and_torques():
     for deg in range(0, 181):              # every degree, 0..180, once each
+        # Solve theta = A*sin(w*t) for t:  t = arcsin(theta/amplitude) / omega
         t = np.arcsin(np.radians(deg) / amplitude) / omega   # exact time the cam hits this angle
 
         angle_deg = np.degrees(theta(t))   # will print back as the integer degree
